@@ -10,6 +10,15 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const app = express();
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve widget.js
+app.use(express.static(__dirname));
+
 
 // ✅ CORS setup for Express 4
 // Handle preflight OPTIONS requests
@@ -125,3 +134,4 @@ app.post("/lead", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
