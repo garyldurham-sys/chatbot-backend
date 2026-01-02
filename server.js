@@ -76,6 +76,9 @@ app.post("/scrape", async (req, res) => {
 });
 
 // Chat endpoint
+console.log("🟡 /chat endpoint hit");
+console.log("OPENAI KEY EXISTS:", !!process.env.OPENAI_API_KEY);
+
 app.post("/chat", async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ reply: "Message is required" });
@@ -102,9 +105,10 @@ Website content: ${siteContentCache}
 
     res.json({ reply: completion.output_text });
   } catch (err) {
-    console.error("Chat error:", err);
-    res.status(500).json({ reply: "Sorry, something went wrong." });
-  }
+  console.error("🔥 OpenAI ERROR FULL:", err);
+  res.status(500).json({ reply: "Sorry, something went wrong." });
+}
+
 });
 
 
@@ -135,6 +139,7 @@ app.post("/lead", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
 
 
 
