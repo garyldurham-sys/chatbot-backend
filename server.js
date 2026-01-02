@@ -82,22 +82,24 @@ app.post("/chat", async (req, res) => {
   console.log("Incoming message:", message);
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: `
+    const completion = await openai.responses.create({
+  model: "gpt-4.1-mini",
+  input: [
+    {
+      role: "system",
+      content: `
 You are a helpful assistant for the website you are embedded on.
-You have access to the website's content provided below.
-Always use this content to answer user's questions about services, pricing, products, or policies.
-Do not ask the user for clarification; assume all relevant information is in the website content.
+Use only the website content to answer questions about services, pricing, products, or policies.
+Do not ask the user for clarification.
+Website content: ${siteContentCache}
 `
-        },
-        { role: "system", content: `Website content: ${siteContentCache}` },
-        { role: "user", content: message }
-      ]
-    });
+    },
+    {
+      role: "user",
+      content: message
+    }
+  ]
+});
 
     const reply = completion.choices[0].message.content;
     res.json({ reply });
@@ -134,4 +136,5 @@ app.post("/lead", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
 
