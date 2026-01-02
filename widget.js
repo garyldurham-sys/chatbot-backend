@@ -1,256 +1,248 @@
-// widget.js
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const backendUrl = "https://YOUR-RENDER-URL.onrender.com"; // keep your real backend URL
 
-  /* ===============================
-     MAIN CONTAINER (LiveChat style)
-     =============================== */
+  /* ==========================
+     CREATE CHAT CONTAINER
+  ========================== */
   const container = document.createElement("div");
-  container.id = "chat-widget-container";
-  container.style.cssText = `
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 392px;
-    height: 714px;
-    max-width: 100%;
-    background: transparent;
-    z-index: 2147483639;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    pointer-events: auto;
+  container.id = "ai-chat-container";
+  container.innerHTML = `
+    <div id="ai-chat-header">
+      <span>Chat with us</span>
+      <button id="ai-chat-minimize">–</button>
+    </div>
+
+    <div id="ai-chat-body">
+      <div id="ai-chat-messages"></div>
+
+      <div id="ai-chat-input-wrap">
+        <input id="ai-chat-input" placeholder="Type your message..." />
+        <button id="ai-chat-send">Send</button>
+      </div>
+
+      <div id="ai-chat-lead">
+        <input id="lead-email" placeholder="Email (optional)" />
+        <input id="lead-phone" placeholder="Phone (optional)" />
+        <button id="lead-send">Send Info</button>
+      </div>
+    </div>
   `;
   document.body.appendChild(container);
 
-  /* ===============================
-     CHAT PANEL
-     =============================== */
-  const chat = document.createElement("div");
-  chat.id = "ai-chat";
-  chat.style.cssText = `
-    width: 100%;
-    height: 100%;
-    background: #ffffff;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transition: transform .25s ease, opacity .25s ease;
-  `;
-  container.appendChild(chat);
-
-  /* ===============================
-     HEADER
-     =============================== */
-  const header = document.createElement("div");
-  header.style.cssText = `
-    height: 56px;
-    background: #0b5cff;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-  `;
-  header.textContent = "Chat with us";
-
-  const minimize = document.createElement("span");
-  minimize.textContent = "—";
-  minimize.style.cssText = `
-    font-size: 20px;
-    cursor: pointer;
-    line-height: 1;
-  `;
-  header.appendChild(minimize);
-  chat.appendChild(header);
-
-  /* ===============================
-     BODY
-     =============================== */
-  const body = document.createElement("div");
-  body.style.cssText = `
-    flex: 1;
-    background: #f7f7f8;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-  `;
-  chat.appendChild(body);
-
-  const messages = document.createElement("div");
-  messages.style.cssText = `
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  `;
-  body.appendChild(messages);
-
-  /* ===============================
-     DEFAULT MESSAGE
-     =============================== */
-  const welcome = document.createElement("div");
-  welcome.textContent = "Hi! How can I help you today?";
-  welcome.style.cssText = `
-    background: #0b5cff;
-    color: white;
-    padding: 12px 16px;
-    border-radius: 18px;
-    max-width: 80%;
-    align-self: flex-start;
-  `;
-  messages.appendChild(welcome);
-
-  /* ===============================
-     OPTIONAL CONTACT INPUTS
-     =============================== */
-  const email = document.createElement("input");
-  email.placeholder = "Email (optional)";
-  email.style.cssText = `
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-  `;
-  body.appendChild(email);
-
-  const phone = document.createElement("input");
-  phone.placeholder = "Phone (optional)";
-  phone.style.cssText = `
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-  `;
-  body.appendChild(phone);
-
-  const sendInfo = document.createElement("button");
-  sendInfo.textContent = "Send info";
-  sendInfo.style.cssText = `
-    background: #0b5cff;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-  `;
-  body.appendChild(sendInfo);
-sendInfo.addEventListener("click", async () => {
-  const emailValue = email.value.trim();
-  const phoneValue = phone.value.trim();
-
-  if (!emailValue && !phoneValue) {
-    alert("Please enter an email or phone number.");
-    return;
-  }
-
-  sendInfo.disabled = true;
-  sendInfo.textContent = "Sending…";
-
-  try {
-    // LEAD SUBMIT
-const res = await fetch("https://YOUR-DOMAIN.com/lead", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true"
-  },
-  body: JSON.stringify({
-    email: emailValue,
-    phone: phoneValue,
-    source: "chat-widget",
-    timestamp: new Date().toISOString()
-  })
-});
-
-
-    if (!res.ok) throw new Error("Failed");
-
-    sendInfo.textContent = "Saved ✓";
-    sendInfo.style.background = "#28a745";
-
-    email.disabled = true;
-    phone.disabled = true;
-
-  } catch (err) {
-    sendInfo.disabled = false;
-    sendInfo.textContent = "Send info";
-    alert("Could not save info. Try again.");
-  }
-});
-
-  /* ===============================
-     INPUT BAR
-     =============================== */
-  const input = document.createElement("input");
-  input.placeholder = "Type your message…";
-  input.style.cssText = `
-    border: none;
-    border-top: 1px solid #e5e5e5;
-    padding: 14px;
-    font-size: 14px;
-    outline: none;
-  `;
-  chat.appendChild(input);
-
-  /* ===============================
-     MESSAGE HELPER
-     =============================== */
-  function addMessage(text, user = false) {
-    const msg = document.createElement("div");
-    msg.textContent = text;
-    msg.style.cssText = `
-      padding: 12px 16px;
-      border-radius: 18px;
-      max-width: 80%;
-      align-self: ${user ? "flex-end" : "flex-start"};
-      background: ${user ? "#e6f0ff" : "#0b5cff"};
-      color: ${user ? "#000" : "#fff"};
-    `;
-    messages.appendChild(msg);
-    body.scrollTop = body.scrollHeight;
-  }
-
-  /* ===============================
-     SEND MESSAGE
-     =============================== */
-  input.addEventListener("keydown", async e => {
-    if (e.key !== "Enter" || !input.value.trim()) return;
-
-    const msg = input.value;
-    input.value = "";
-    addMessage(msg, true);
-
-    try {
-      // CHAT MESSAGE
-const res = await fetch("https://confidently-unobligative-aura.ngrok-free.dev/chat", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true"
-  },
-  body: JSON.stringify({ message: msg })
-});
-
-      const data = await res.json();
-      addMessage(data.reply || "…");
-    } catch {
-      addMessage("Something went wrong.");
+  /* ==========================
+     STYLES
+  ========================== */
+  const style = document.createElement("style");
+  style.textContent = `
+    #ai-chat-container {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      width: 380px;
+      max-height: 640px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.15);
+      display: flex;
+      flex-direction: column;
+      font-family: system-ui, sans-serif;
+      z-index: 999999;
+      overflow: hidden;
     }
+
+    #ai-chat-header {
+      background: #0f172a;
+      color: #fff;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    #ai-chat-header button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #ai-chat-body {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    #ai-chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      max-width: 80%;
+      margin-bottom: 10px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .user { background: #2563eb; color: #fff; margin-left: auto; }
+    .ai { background: #f1f5f9; color: #000; }
+
+    #ai-chat-input-wrap {
+      display: flex;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    #ai-chat-input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      outline: none;
+    }
+
+    #ai-chat-send {
+      padding: 12px 16px;
+      background: #2563eb;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #ai-chat-lead {
+      padding: 12px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #ai-chat-lead input,
+    #ai-chat-lead button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    #ai-chat-lead button {
+      background: #0f172a;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* ==========================
+       MOBILE BEHAVIOR
+    ========================== */
+    @media (max-width: 640px) {
+      #ai-chat-container {
+        width: calc(100% - 32px);
+        right: 16px;
+        left: 16px;
+        max-height: 90vh;
+      }
+
+      #ai-chat-container.minimized {
+        height: auto;
+      }
+
+      #ai-chat-container.minimized #ai-chat-body {
+        display: none;
+      }
+    }
+
+    .minimized #ai-chat-body {
+      display: none;
+    }
+  `;
+  document.head.appendChild(style);
+
+  /* ==========================
+     ELEMENT REFERENCES
+  ========================== */
+  const messages = container.querySelector("#ai-chat-messages");
+  const input = container.querySelector("#ai-chat-input");
+  const sendBtn = container.querySelector("#ai-chat-send");
+  const minimizeBtn = container.querySelector("#ai-chat-minimize");
+  const header = container.querySelector("#ai-chat-header");
+  const leadSend = container.querySelector("#lead-send");
+
+  /* ==========================
+     MOBILE DEFAULT MINIMIZED
+  ========================== */
+  const isMobile = window.matchMedia("(max-width: 640px)").matches;
+  if (isMobile) container.classList.add("minimized");
+
+  /* ==========================
+     TOGGLE OPEN / CLOSE
+  ========================== */
+  header.addEventListener("click", () => {
+    container.classList.toggle("minimized");
   });
 
-  /* ===============================
-     MINIMIZE
-     =============================== */
-  let minimized = false;
-  minimize.onclick = e => {
+  minimizeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    minimized = !minimized;
-    chat.style.transform = minimized ? "translateY(92%)" : "translateY(0)";
-  };
+    container.classList.add("minimized");
+  });
 
+  /* ==========================
+     DEFAULT MESSAGE
+  ========================== */
+  addMessage("ai", "Hi! How can I help you today?");
+
+  /* ==========================
+     CHAT FUNCTIONS
+  ========================== */
+  function addMessage(sender, text) {
+    const div = document.createElement("div");
+    div.className = `msg ${sender}`;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+    addMessage("user", text);
+    input.value = "";
+
+    try {
+      const res = await fetch(`${backendUrl}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      addMessage("ai", data.reply);
+    } catch {
+      addMessage("ai", "Sorry, something went wrong.");
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keydown", e => e.key === "Enter" && sendMessage());
+
+  /* ==========================
+     LEAD SUBMIT
+  ========================== */
+  leadSend.addEventListener("click", async () => {
+    const email = container.querySelector("#lead-email").value;
+    const phone = container.querySelector("#lead-phone").value;
+
+    if (!email && !phone) return;
+
+    try {
+      await fetch(`${backendUrl}/lead`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone })
+      });
+      addMessage("ai", "Thanks! We’ll be in touch.");
+    } catch {
+      addMessage("ai", "Could not save info. Try again.");
+    }
+  });
 });
