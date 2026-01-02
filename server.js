@@ -79,35 +79,34 @@ app.post("/scrape", async (req, res) => {
 app.post("/chat", async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ reply: "Message is required" });
-  console.log("Incoming message:", message);
 
   try {
     const completion = await openai.responses.create({
-  model: "gpt-4.1-mini",
-  input: [
-    {
-      role: "system",
-      content: `
+      model: "gpt-4.1-mini",
+      input: [
+        {
+          role: "system",
+          content: `
 You are a helpful assistant for the website you are embedded on.
 Use only the website content to answer questions about services, pricing, products, or policies.
 Do not ask the user for clarification.
 Website content: ${siteContentCache}
 `
-    },
-    {
-      role: "user",
-      content: message
-    }
-  ]
-});
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ]
+    });
 
-    const reply = completion.choices[0].message.content;
-    res.json({ reply });
+    res.json({ reply: completion.output_text });
   } catch (err) {
-    console.error(err);
-    res.json({ reply: "Sorry, something went wrong." });
+    console.error("Chat error:", err);
+    res.status(500).json({ reply: "Sorry, something went wrong." });
   }
 });
+
 
 // ✅ Lead capture endpoint
 app.post("/lead", async (req, res) => {
@@ -136,5 +135,6 @@ app.post("/lead", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
 
 
