@@ -76,12 +76,17 @@ app.post("/scrape", async (req, res) => {
 });
 
 // Chat endpoint
-console.log("🟡 /chat endpoint hit");
-console.log("OPENAI KEY EXISTS:", !!process.env.OPENAI_API_KEY);
-
 app.post("/chat", async (req, res) => {
+  console.log("🟡 /chat endpoint HIT");
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+  console.log("OPENAI KEY EXISTS:", !!process.env.OPENAI_API_KEY);
+
   const { message } = req.body;
-  if (!message) return res.status(400).json({ reply: "Message is required" });
+  if (!message) {
+    console.log("❌ No message provided");
+    return res.status(400).json({ reply: "Message is required" });
+  }
 
   try {
     const completion = await openai.responses.create({
@@ -103,12 +108,14 @@ Website content: ${siteContentCache}
       ]
     });
 
-    res.json({ reply: completion.output_text });
-  } catch (err) {
-  console.error("🔥 OpenAI ERROR FULL:", err);
-  res.status(500).json({ reply: "Sorry, something went wrong." });
-}
+    console.log("✅ OpenAI response received");
 
+    res.json({ reply: completion.output_text });
+
+  } catch (err) {
+    console.error("🔥 OpenAI ERROR FULL:", err);
+    res.status(500).json({ reply: "Sorry, something went wrong." });
+  }
 });
 
 
@@ -139,6 +146,7 @@ app.post("/lead", async (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
 
 
 
